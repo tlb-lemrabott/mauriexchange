@@ -101,16 +101,6 @@ cd backend
 
 ---
 
-## 🛡️ Security & Best Practices
-
-* HTTPS everywhere
-* SQL injection prevention via JPA
-* Input validation & exception handling
-* Environment-based secrets (never hardcoded)
-* Rate limiting (planned)
-
----
-
 ## 📊 Monitoring & Observability
 
 * **Frontend**: Vercel Analytics
