@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: mauriexchange-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root@root
+      MYSQL_DATABASE: mauriexchange_db
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root@root
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - mauriexchange-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  # Backend Application
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: mauriexchange-backend
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_NAME=mauriexchange_db
+      - DB_USER=root
+      - DB_PASSWORD=root@root
+      - SPRING_PROFILES_ACTIVE=dev
+      - LOG_LEVEL=DEBUG
+      - ADMIN_USER=admin
+      - ADMIN_PASSWORD=admin123
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - mauriexchange-network
+    volumes:
+      - ./backend:/app
+      - /app/target
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/v1/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  mauriexchange-network:
+    driver: bridge
