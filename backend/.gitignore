@@ -1,9 +1,13 @@
 HELP.md
 target/
-src/main/resources/application-dev.properties
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
+
+# Environment files
+.env
+.env.local
+.env.production
 
 ### STS ###
 .apt_generated
