@@ -1,7 +1,9 @@
 package com.mauriexchange.code.controller;
 
+import com.mauriexchange.code.config.PaginationConfig;
 import com.mauriexchange.code.dto.ApiResponseDto;
 import com.mauriexchange.code.dto.CurrencyResponseDto;
+import com.mauriexchange.code.dto.PaginatedResponseDto;
 import com.mauriexchange.code.exception.DataNotFoundException;
 import com.mauriexchange.code.service.CurrencyService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -27,6 +29,7 @@ import java.util.Optional;
 public class CurrencyController {
     
     private final CurrencyService currencyService;
+    private final PaginationConfig paginationConfig;
     
     @GetMapping
     @Operation(
@@ -44,6 +47,34 @@ public class CurrencyController {
         List<CurrencyResponseDto> currencies = currencyService.getAllCurrencies();
         return ResponseEntity.ok(ApiResponseDto.success(currencies, 
                 "Successfully retrieved " + currencies.size() + " currencies"));
+    }
+    
+    @GetMapping("/paginated")
+    @Operation(
+        summary = "Get all currencies with pagination",
+        description = "Retrieve currencies with pagination support. Page numbers are 0-based."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successfully retrieved currencies",
+                    content = @Content(schema = @Schema(implementation = ApiResponseDto.class))),
+        @ApiResponse(responseCode = "404", description = "No currency data available"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<ApiResponseDto<PaginatedResponseDto<CurrencyResponseDto>>> getAllCurrenciesPaginated(
+            @Parameter(description = "Page number (0-based)", example = "0")
+            @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Page size", example = "10")
+            @RequestParam(defaultValue = "20") int size) {
+        log.info("Fetching currencies with pagination - page: {}, size: {}", page, size);
+        
+        // Use default page size from configuration if not specified
+        int pageSize = size > 0 ? size : paginationConfig.getDefaultPageSize();
+        
+        PaginatedResponseDto<CurrencyResponseDto> paginatedResponse = 
+                currencyService.getAllCurrenciesPaginated(page, pageSize);
+        
+        return ResponseEntity.ok(ApiResponseDto.success(paginatedResponse, 
+                "Successfully retrieved currencies with pagination"));
     }
     
     @GetMapping("/{id}")
@@ -114,6 +145,35 @@ public class CurrencyController {
         List<CurrencyResponseDto> currencies = currencyService.getCurrenciesByName(name);
         return ResponseEntity.ok(ApiResponseDto.success(currencies, 
                 "Found " + currencies.size() + " currencies matching '" + name + "'"));
+    }
+    
+    @GetMapping("/search/paginated")
+    @Operation(
+        summary = "Search currencies by name with pagination",
+        description = "Search for currencies by their French or Arabic name with pagination support"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successfully retrieved currencies",
+                    content = @Content(schema = @Schema(implementation = ApiResponseDto.class))),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<ApiResponseDto<PaginatedResponseDto<CurrencyResponseDto>>> searchCurrenciesByNamePaginated(
+            @Parameter(description = "Name to search for", example = "norvégienne")
+            @RequestParam String name,
+            @Parameter(description = "Page number (0-based)", example = "0")
+            @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Page size", example = "10")
+            @RequestParam(defaultValue = "20") int size) {
+        log.info("Searching currencies with name: {} - page: {}, size: {}", name, page, size);
+        
+        // Use default page size from configuration if not specified
+        int pageSize = size > 0 ? size : paginationConfig.getDefaultPageSize();
+        
+        PaginatedResponseDto<CurrencyResponseDto> paginatedResponse = 
+                currencyService.getCurrenciesByNamePaginated(name, page, pageSize);
+        
+        return ResponseEntity.ok(ApiResponseDto.success(paginatedResponse, 
+                "Found currencies matching '" + name + "' with pagination"));
     }
     
     @GetMapping("/{currencyId}/exchange-rates/latest")
