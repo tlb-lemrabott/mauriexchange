@@ -1,12 +1,15 @@
 package com.mauriexchange.code.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mauriexchange.code.config.PaginationConfig;
 import com.mauriexchange.code.dto.CurrencyResponseDto;
+import com.mauriexchange.code.dto.PaginatedResponseDto;
 import com.mauriexchange.code.entity.Currency;
 import com.mauriexchange.code.entity.CurrencyData;
 import com.mauriexchange.code.exception.DataNotFoundException;
 import com.mauriexchange.code.exception.DataProcessingException;
 import com.mauriexchange.code.service.CurrencyService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -23,7 +26,10 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class CurrencyServiceImpl implements CurrencyService {
+    
+    private final PaginationConfig paginationConfig;
     
     @Value("${app.data.source.path}")
     private String dataSourcePath;
@@ -67,6 +73,26 @@ public class CurrencyServiceImpl implements CurrencyService {
         return currencyData.getData().stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
+    }
+    
+    @Override
+    public PaginatedResponseDto<CurrencyResponseDto> getAllCurrenciesPaginated(int page, int size) {
+        if (currencyData == null || currencyData.getData() == null) {
+            throw new DataNotFoundException("No currency data available");
+        }
+        
+        // Validate and adjust page size
+        int validatedSize = Math.min(size, paginationConfig.getMaxPageSize());
+        validatedSize = Math.max(validatedSize, 1);
+        
+        // Validate page number
+        int validatedPage = Math.max(page, 0);
+        
+        List<CurrencyResponseDto> allCurrencies = currencyData.getData().stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+        
+        return createPaginatedResponse(allCurrencies, validatedPage, validatedSize);
     }
     
     @Override
@@ -114,6 +140,48 @@ public class CurrencyServiceImpl implements CurrencyService {
                 })
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
+    }
+    
+    @Override
+    public PaginatedResponseDto<CurrencyResponseDto> getCurrenciesByNamePaginated(String name, int page, int size) {
+        if (currencyData == null || currencyData.getData() == null) {
+            return PaginatedResponseDto.<CurrencyResponseDto>builder()
+                    .data(List.of())
+                    .metadata(PaginatedResponseDto.PaginationMetadata.builder()
+                            .page(page)
+                            .size(size)
+                            .totalElements(0)
+                            .totalPages(0)
+                            .hasNext(false)
+                            .hasPrevious(false)
+                            .isFirst(true)
+                            .isLast(true)
+                            .build())
+                    .build();
+        }
+        
+        // Validate and adjust page size
+        int validatedSize = Math.min(size, paginationConfig.getMaxPageSize());
+        validatedSize = Math.max(validatedSize, 1);
+        
+        // Validate page number
+        int validatedPage = Math.max(page, 0);
+        
+        String searchName = name.toLowerCase();
+        List<CurrencyResponseDto> filteredCurrencies = currencyData.getData().stream()
+                .filter(currency -> {
+                    Currency.CurrencyAttributes attrs = currency.getAttributes();
+                    if (attrs == null) return false;
+                    
+                    return (attrs.getNameFr() != null && 
+                           attrs.getNameFr().toLowerCase().contains(searchName)) ||
+                           (attrs.getNameAr() != null && 
+                           attrs.getNameAr().toLowerCase().contains(searchName));
+                })
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+        
+        return createPaginatedResponse(filteredCurrencies, validatedPage, validatedSize);
     }
     
     @Override
@@ -192,6 +260,37 @@ public class CurrencyServiceImpl implements CurrencyService {
                 .updatedAt(attrs.getUpdatedAt())
                 .publishedAt(attrs.getPublishedAt())
                 .endDate(attrs.getEndDate())
+                .build();
+    }
+    
+    private PaginatedResponseDto<CurrencyResponseDto> createPaginatedResponse(
+            List<CurrencyResponseDto> allData, int page, int size) {
+        
+        long totalElements = allData.size();
+        int totalPages = (int) Math.ceil((double) totalElements / size);
+        
+        // Calculate start and end indices
+        int startIndex = page * size;
+        int endIndex = Math.min(startIndex + size, (int) totalElements);
+        
+        // Get the page data
+        List<CurrencyResponseDto> pageData = allData.subList(startIndex, endIndex);
+        
+        // Build metadata
+        PaginatedResponseDto.PaginationMetadata metadata = PaginatedResponseDto.PaginationMetadata.builder()
+                .page(page)
+                .size(size)
+                .totalElements(totalElements)
+                .totalPages(totalPages)
+                .hasNext(page < totalPages - 1)
+                .hasPrevious(page > 0)
+                .isFirst(page == 0)
+                .isLast(page == totalPages - 1 || totalPages == 0)
+                .build();
+        
+        return PaginatedResponseDto.<CurrencyResponseDto>builder()
+                .data(pageData)
+                .metadata(metadata)
                 .build();
     }
 }
