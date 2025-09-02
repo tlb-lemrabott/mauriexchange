@@ -27,7 +27,7 @@ A Spring Boot REST API for managing currency exchange data, built with modern Ja
 
 2. **Configure the data source path** in `application.properties`:
    ```properties
-   app.data.source.path=../database/bcm-source_db.json
+   app.data.source.path=../database/your-data-source.json
    ```
 
 3. **Build the application**:
@@ -61,9 +61,11 @@ http://localhost:8080/api/v1/currencies
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | GET | `/` | Get all currencies |
+| GET | `/paginated?page={page}&size={size}` | Get all currencies with pagination |
 | GET | `/{id}` | Get currency by ID |
 | GET | `/code/{code}` | Get currency by ISO code |
 | GET | `/search?name={name}` | Search currencies by name |
+| GET | `/search/paginated?name={name}&page={page}&size={size}` | Search currencies by name with pagination |
 | GET | `/{currencyId}/exchange-rates/latest?limit={limit}` | Get latest exchange rates |
 | GET | `/{currencyId}/exchange-rates/range?startDate={date}&endDate={date}` | Get exchange rates by date range |
 
@@ -76,22 +78,32 @@ curl -X GET "http://localhost:8080/api/v1/currencies"
 
 #### Get Currency by Code
 ```bash
-curl -X GET "http://localhost:8080/api/v1/currencies/code/NOK"
+curl -X GET "http://localhost:8080/api/v1/currencies/code/{CURRENCY_CODE}"
 ```
 
 #### Search Currencies by Name
 ```bash
-curl -X GET "http://localhost:8080/api/v1/currencies/search?name=norvégienne"
+curl -X GET "http://localhost:8080/api/v1/currencies/search?name={CURRENCY_NAME}"
 ```
 
 #### Get Latest Exchange Rates
 ```bash
-curl -X GET "http://localhost:8080/api/v1/currencies/44/exchange-rates/latest?limit=5"
+curl -X GET "http://localhost:8080/api/v1/currencies/{CURRENCY_ID}/exchange-rates/latest?limit={LIMIT}"
 ```
 
 #### Get Exchange Rates by Date Range
 ```bash
-curl -X GET "http://localhost:8080/api/v1/currencies/44/exchange-rates/range?startDate=2016-06-14&endDate=2016-06-16"
+curl -X GET "http://localhost:8080/api/v1/currencies/{CURRENCY_ID}/exchange-rates/range?startDate={START_DATE}&endDate={END_DATE}"
+```
+
+#### Get All Currencies with Pagination
+```bash
+curl -X GET "http://localhost:8080/api/v1/currencies/paginated?page={PAGE}&size={SIZE}"
+```
+
+#### Search Currencies by Name with Pagination
+```bash
+curl -X GET "http://localhost:8080/api/v1/currencies/search/paginated?name={CURRENCY_NAME}&page={PAGE}&size={SIZE}"
 ```
 
 ## 📊 Response Format
@@ -103,32 +115,66 @@ All API responses follow a consistent format:
   "success": true,
   "message": "Successfully retrieved currencies",
   "data": [...],
-  "timestamp": "2024-01-20T10:30:00"
+  "timestamp": "2024-01-01T00:00:00"
 }
 ```
 
 ### Currency Response Structure
 ```json
 {
-  "id": 44,
-  "nameFr": "Couronne norvégienne",
-  "nameAr": "الكرونة النرويجية",
+  "id": 1,
+  "nameFr": "Currency Name in French",
+  "nameAr": "اسم العملة بالعربية",
   "unity": 100,
-  "code": "NOK",
-  "createdAt": "2024-11-16T20:47:38.363",
-  "updatedAt": "2025-01-20T01:43:21.987",
-  "publishedAt": "2024-11-16T20:47:38.361",
+  "code": "XXX",
+  "createdAt": "2024-01-01T00:00:00.000",
+  "updatedAt": "2024-01-01T00:00:00.000",
+  "publishedAt": "2024-01-01T00:00:00.000",
   "exchangeRates": [
     {
-      "id": 137058,
-      "day": "2016-06-14",
-      "value": "4233.21",
-      "createdAt": "2025-01-06T00:03:38.255",
-      "updatedAt": "2025-01-06T00:03:38.255",
-      "publishedAt": "2025-01-06T00:03:38.255",
-      "endDate": "2016-06-15"
+      "id": 1,
+      "day": "2024-01-01",
+      "value": "100.00",
+      "createdAt": "2024-01-01T00:00:00.000",
+      "updatedAt": "2024-01-01T00:00:00.000",
+      "publishedAt": "2024-01-01T00:00:00.000",
+      "endDate": "2024-01-02"
     }
   ]
+}
+```
+
+### Paginated Response Structure
+```json
+{
+  "success": true,
+  "message": "Successfully retrieved currencies with pagination",
+  "data": {
+    "data": [
+      {
+        "id": 1,
+        "nameFr": "Currency Name in French",
+        "nameAr": "اسم العملة بالعربية",
+        "unity": 100,
+        "code": "XXX",
+        "createdAt": "2024-01-01T00:00:00.000",
+        "updatedAt": "2024-01-01T00:00:00.000",
+        "publishedAt": "2024-01-01T00:00:00.000",
+        "exchangeRates": [...]
+      }
+    ],
+    "metadata": {
+      "page": 0,
+      "size": 10,
+      "totalElements": 100,
+      "totalPages": 10,
+      "hasNext": true,
+      "hasPrevious": false,
+      "isFirst": true,
+      "isLast": false
+    }
+  },
+  "timestamp": "2024-01-01T00:00:00"
 }
 ```
 
@@ -169,8 +215,10 @@ The tests verify:
 | Property | Description | Default |
 |----------|-------------|---------|
 | `server.port` | Server port | 8080 |
-| `app.data.source.path` | Path to JSON data source | `../database/bcm-source_db.json` |
+| `app.data.source.path` | Path to JSON data source | `../database/your-data-source.json` |
 | `springdoc.swagger-ui.path` | Swagger UI path | `/swagger-ui.html` |
+| `app.pagination.default-page-size` | Default page size for pagination | 20 |
+| `app.pagination.max-page-size` | Maximum allowed page size | 100 |
 
 ## 🚨 Error Handling
 
