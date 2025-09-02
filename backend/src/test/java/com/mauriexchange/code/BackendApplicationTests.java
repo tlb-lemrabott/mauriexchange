@@ -38,4 +38,40 @@ class BackendApplicationTests {
         assertEquals("NOK", currency.get().getCode());
         assertEquals("Couronne norvégienne", currency.get().getNameFr());
     }
+    
+    @Test
+    void testGetAllCurrenciesPaginated() {
+        // Test pagination functionality
+        var paginatedResponse = currencyService.getAllCurrenciesPaginated(0, 10);
+        assertNotNull(paginatedResponse);
+        assertNotNull(paginatedResponse.getData());
+        assertNotNull(paginatedResponse.getMetadata());
+        
+        // Should have 10 items on first page (or less if total < 10)
+        assertTrue(paginatedResponse.getData().size() <= 10);
+        assertEquals(0, paginatedResponse.getMetadata().getPage());
+        assertEquals(10, paginatedResponse.getMetadata().getSize());
+        assertTrue(paginatedResponse.getMetadata().isFirst());
+        
+        // Test second page
+        var secondPage = currencyService.getAllCurrenciesPaginated(1, 10);
+        assertNotNull(secondPage);
+        assertNotNull(secondPage.getData());
+        assertEquals(1, secondPage.getMetadata().getPage());
+        assertFalse(secondPage.getMetadata().isFirst());
+    }
+    
+    @Test
+    void testSearchCurrenciesByNamePaginated() {
+        // Test search pagination functionality
+        var paginatedResponse = currencyService.getCurrenciesByNamePaginated("norvégienne", 0, 5);
+        assertNotNull(paginatedResponse);
+        assertNotNull(paginatedResponse.getData());
+        assertNotNull(paginatedResponse.getMetadata());
+        
+        // Should find at least one currency with "norvégienne" in the name
+        assertTrue(paginatedResponse.getData().size() > 0);
+        assertEquals(0, paginatedResponse.getMetadata().getPage());
+        assertEquals(5, paginatedResponse.getMetadata().getSize());
+    }
 }
