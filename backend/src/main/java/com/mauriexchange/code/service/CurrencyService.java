@@ -1,6 +1,7 @@
 package com.mauriexchange.code.service;
 
 import com.mauriexchange.code.dto.CurrencyResponseDto;
+import com.mauriexchange.code.dto.PaginatedResponseDto;
 
 import java.util.List;
 import java.util.Optional;
@@ -12,6 +13,14 @@ public interface CurrencyService {
      * @return List of all currencies
      */
     List<CurrencyResponseDto> getAllCurrencies();
+    
+    /**
+     * Get all currencies with pagination
+     * @param page Page number (0-based)
+     * @param size Page size
+     * @return Paginated response containing currencies
+     */
+    PaginatedResponseDto<CurrencyResponseDto> getAllCurrenciesPaginated(int page, int size);
     
     /**
      * Get currency by ID
@@ -33,6 +42,15 @@ public interface CurrencyService {
      * @return List of matching currencies
      */
     List<CurrencyResponseDto> getCurrenciesByName(String name);
+    
+    /**
+     * Get currencies by name with pagination
+     * @param name Name to search for
+     * @param page Page number (0-based)
+     * @param size Page size
+     * @return Paginated response containing matching currencies
+     */
+    PaginatedResponseDto<CurrencyResponseDto> getCurrenciesByNamePaginated(String name, int page, int size);
     
     /**
      * Get latest exchange rates for a specific currency
