@@ -3,6 +3,7 @@ package com.mauriexchange.code.controller;
 import com.mauriexchange.code.config.PaginationConfig;
 import com.mauriexchange.code.dto.ApiResponseDto;
 import com.mauriexchange.code.dto.CurrencyResponseDto;
+import com.mauriexchange.code.dto.CurrencyListItemDto;
 import com.mauriexchange.code.dto.PaginatedResponseDto;
 import com.mauriexchange.code.exception.DataNotFoundException;
 import com.mauriexchange.code.service.CurrencyService;
@@ -31,6 +32,30 @@ public class CurrencyController {
     private final CurrencyService currencyService;
     private final PaginationConfig paginationConfig;
     
+    @GetMapping
+    @Operation(
+        summary = "Get all currencies (lite)",
+        description = "Retrieve all available currencies with minimal fields for dropdowns"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successfully retrieved currencies",
+                    content = @Content(schema = @Schema(implementation = ApiResponseDto.class))),
+        @ApiResponse(responseCode = "404", description = "No currency data available"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<ApiResponseDto<List<CurrencyListItemDto>>> getAllCurrencies() {
+        log.info("Fetching all currencies (lite)");
+        List<CurrencyListItemDto> items = currencyService.getAllCurrencies().stream()
+                .map(c -> CurrencyListItemDto.builder()
+                        .code(c.getCode())
+                        .nameFr(c.getNameFr())
+                        .nameAr(c.getNameAr())
+                        .unity(c.getUnity())
+                        .build())
+                .toList();
+        return ResponseEntity.ok(ApiResponseDto.success(items));
+    }
+
     @GetMapping("/code/{code}")
     @Operation(
         summary = "Get currency by code",
