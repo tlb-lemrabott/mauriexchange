@@ -1,2 +1,11 @@
 Project.md
 specifications.md
+
+# Ignore macOS metadata files
+.DS_Store
+
+# Ignore local database directory
+database/
+
+# Ignore local docs/notes
+git-flow.txt
