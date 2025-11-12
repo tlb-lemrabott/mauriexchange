@@ -1,0 +1,18 @@
+package com.mauriexchange.code.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class CurrencyListItemDto {
+    private String code;
+    private String nameFr;
+    private String nameAr;
+    private Integer unity;
+}
+
