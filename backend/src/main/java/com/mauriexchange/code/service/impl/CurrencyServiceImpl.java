@@ -6,6 +6,7 @@ import com.mauriexchange.code.dto.CurrencyResponseDto;
 import com.mauriexchange.code.dto.PaginatedResponseDto;
 import com.mauriexchange.code.dto.OfficialRateResponseDto;
 import com.mauriexchange.code.dto.LatestRatesResponseDto;
+import com.mauriexchange.code.dto.ConversionResponseDto;
 import com.mauriexchange.code.entity.Currency;
 import com.mauriexchange.code.entity.CurrencyData;
 import com.mauriexchange.code.exception.DataNotFoundException;
@@ -410,6 +411,73 @@ public class CurrencyServiceImpl implements CurrencyService {
         return LatestRatesResponseDto.builder()
                 .date(globalLatestDate.get())
                 .data(items)
+                .build();
+    }
+
+    private Optional<RateOnDate> findLatestRateForCode(String code) {
+        Optional<CurrencyResponseDto> currencyOpt = getCurrencyByCode(code);
+        if (currencyOpt.isEmpty()) return Optional.empty();
+        List<CurrencyResponseDto.ExchangeRateDto> rates = currencyOpt.get().getExchangeRates();
+        if (rates == null || rates.isEmpty()) return Optional.empty();
+        return rates.stream()
+                .filter(r -> r.getDay() != null && r.getValue() != null)
+                .max(java.util.Comparator.comparing(CurrencyResponseDto.ExchangeRateDto::getDay))
+                .flatMap(r -> {
+                    try {
+                        Double v = Double.parseDouble(r.getValue());
+                        return Optional.of(new RateOnDate(v, r.getDay()));
+                    } catch (NumberFormatException ex) {
+                        return Optional.empty();
+                    }
+                });
+    }
+
+    private record RateOnDate(Double value, String date) {}
+
+    @Override
+    public ConversionResponseDto convert(String from, String to, double amount) {
+        String fromCode = from.toUpperCase();
+        String toCode = to.toUpperCase();
+
+        // MRU is the base unit in our dataset
+        Optional<RateOnDate> fromRateOpt = "MRU".equalsIgnoreCase(fromCode) ?
+                Optional.of(new RateOnDate(1.0, null)) : findLatestRateForCode(fromCode);
+        Optional<RateOnDate> toRateOpt = "MRU".equalsIgnoreCase(toCode) ?
+                Optional.of(new RateOnDate(1.0, null)) : findLatestRateForCode(toCode);
+
+        if (fromRateOpt.isEmpty()) {
+            throw new DataNotFoundException("No latest official rate found for currency: " + fromCode);
+        }
+        if (toRateOpt.isEmpty()) {
+            throw new DataNotFoundException("No latest official rate found for currency: " + toCode);
+        }
+
+        double rateFromMRU = fromRateOpt.get().value(); // MRU per 1 from
+        double rateToMRU = toRateOpt.get().value();     // MRU per 1 to
+
+        // Effective rate from -> to
+        double rate = rateFromMRU / rateToMRU;
+        double converted = amount * rate;
+
+        // pick a reference date: max of the two when present
+        String date = null;
+        String df = fromRateOpt.get().date();
+        String dt = toRateOpt.get().date();
+        if (df != null && dt != null) {
+            date = df.compareTo(dt) >= 0 ? df : dt;
+        } else if (df != null) {
+            date = df;
+        } else if (dt != null) {
+            date = dt;
+        }
+
+        return ConversionResponseDto.builder()
+                .from(fromCode)
+                .to(toCode)
+                .amount(amount)
+                .rate(rate)
+                .convertedAmount(converted)
+                .date(date)
                 .build();
     }
 }

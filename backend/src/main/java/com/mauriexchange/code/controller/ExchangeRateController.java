@@ -4,6 +4,7 @@ import com.mauriexchange.code.dto.ApiResponseDto;
 import com.mauriexchange.code.dto.OfficialRateResponseDto;
 import com.mauriexchange.code.dto.LatestRatesResponseDto;
 import com.mauriexchange.code.config.RatesConfig;
+import com.mauriexchange.code.dto.ConversionResponseDto;
 import com.mauriexchange.code.exception.BadRequestException;
 import com.mauriexchange.code.exception.DataNotFoundException;
 import com.mauriexchange.code.service.CurrencyService;
@@ -88,4 +89,5 @@ public class ExchangeRateController {
         LatestRatesResponseDto payload = currencyService.getLatestRates(margin);
         return ResponseEntity.ok(ApiResponseDto.success(payload));
     }
+
 }
