@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mauriexchange.code.config.PaginationConfig;
 import com.mauriexchange.code.dto.CurrencyResponseDto;
 import com.mauriexchange.code.dto.PaginatedResponseDto;
+import com.mauriexchange.code.dto.OfficialRateResponseDto;
 import com.mauriexchange.code.entity.Currency;
 import com.mauriexchange.code.entity.CurrencyData;
 import com.mauriexchange.code.exception.DataNotFoundException;
@@ -222,6 +223,38 @@ public class CurrencyServiceImpl implements CurrencyService {
                 })
                 .sorted((r1, r2) -> r1.getDay().compareTo(r2.getDay()))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Optional<OfficialRateResponseDto> getOfficialRateByCodeAndDate(String code, String date) {
+        Optional<CurrencyResponseDto> currencyOpt = getCurrencyByCode(code);
+        if (currencyOpt.isEmpty()) {
+            return Optional.empty();
+        }
+
+        List<CurrencyResponseDto.ExchangeRateDto> rates = currencyOpt.get().getExchangeRates();
+        if (rates == null || rates.isEmpty()) {
+            return Optional.empty();
+        }
+
+        return rates.stream()
+                .filter(r -> date.equals(r.getDay()))
+                .findFirst()
+                .flatMap(r -> {
+                    try {
+                        Double value = r.getValue() != null ? Double.parseDouble(r.getValue()) : null;
+                        if (value == null) return Optional.empty();
+                        return Optional.of(OfficialRateResponseDto.builder()
+                                .code(currencyOpt.get().getCode())
+                                .officialRate(value)
+                                .date(date)
+                                .source("CACHE")
+                                .build());
+                    } catch (NumberFormatException ex) {
+                        log.warn("Unable to parse rate value '{}' for {} on {}", r.getValue(), code, date);
+                        return Optional.empty();
+                    }
+                });
     }
     
     private CurrencyResponseDto convertToDto(Currency currency) {
