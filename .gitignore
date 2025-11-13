@@ -10,3 +10,6 @@ database/
 # Ignore local docs/notes
 git-flow.txt
 .DS_Store
+
+#Documentation
+documentation
