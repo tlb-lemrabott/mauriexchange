@@ -1,0 +1,4 @@
+.rates { width: 100%; border-collapse: collapse; }
+.rates th, .rates td { border-bottom: 1px solid #eee; padding: .5rem; text-align: left; }
+.error { color: #b00020; }
+
