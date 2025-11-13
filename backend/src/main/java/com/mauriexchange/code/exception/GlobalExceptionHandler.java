@@ -42,6 +42,20 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
     
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<ApiResponseDto<Void>> handleBadRequestException(
+            BadRequestException ex, WebRequest request) {
+        log.error("Bad request: {}", ex.getMessage());
+        
+        ApiResponseDto<Void> response = ApiResponseDto.<Void>builder()
+                .success(false)
+                .message(ex.getMessage())
+                .timestamp(LocalDateTime.now())
+                .build();
+        
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+    
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponseDto<Void>> handleGenericException(
             Exception ex, WebRequest request) {

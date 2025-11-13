@@ -2,6 +2,7 @@ package com.mauriexchange.code.service;
 
 import com.mauriexchange.code.dto.CurrencyResponseDto;
 import com.mauriexchange.code.dto.PaginatedResponseDto;
+import com.mauriexchange.code.dto.OfficialRateResponseDto;
 
 import java.util.List;
 import java.util.Optional;
@@ -69,4 +70,12 @@ public interface CurrencyService {
      */
     List<CurrencyResponseDto.ExchangeRateDto> getExchangeRatesByDateRange(
             Long currencyId, String startDate, String endDate);
+
+    /**
+     * Get official rate for a currency code at a specific date.
+     * @param code ISO currency code
+     * @param date Date in YYYY-MM-DD
+     * @return Optional response containing official rate info
+     */
+    Optional<OfficialRateResponseDto> getOfficialRateByCodeAndDate(String code, String date);
 }
