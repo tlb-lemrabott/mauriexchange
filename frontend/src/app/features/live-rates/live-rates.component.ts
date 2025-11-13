@@ -1,8 +1,8 @@
 import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ExchangeRatesAPIService } from '../../api/api/exchangeRatesAPI.service';
-import { map, catchError } from 'rxjs/operators';
-import { of } from 'rxjs';
+import { map, catchError, switchMap } from 'rxjs/operators';
+import { of, from } from 'rxjs';
 
 @Component({
   selector: 'app-live-rates',
@@ -20,8 +20,15 @@ export class LiveRatesComponent {
 
   constructor() {
     this.api
-      .getLatestRates('body', false, { httpHeaderAccept: 'application/json' })
+      .getLatestRates()
       .pipe(
+        switchMap((res: any) => {
+          // If generator requested */* accept, Angular may return a Blob. Parse it.
+          if (res instanceof Blob) {
+            return from(res.text()).pipe(map(txt => JSON.parse(txt)));
+          }
+          return of(res);
+        }),
         map((res: any) => {
           console.debug('[live-rates] latest response', res);
           const date = res?.data?.date ?? null;
