@@ -4,6 +4,7 @@ import com.mauriexchange.code.dto.CurrencyResponseDto;
 import com.mauriexchange.code.dto.PaginatedResponseDto;
 import com.mauriexchange.code.dto.OfficialRateResponseDto;
 import com.mauriexchange.code.dto.LatestRatesResponseDto;
+import com.mauriexchange.code.dto.ConversionResponseDto;
 
 import java.util.List;
 import java.util.Optional;
@@ -86,4 +87,10 @@ public interface CurrencyService {
      * @return Aggregated response with latest date and items
      */
     LatestRatesResponseDto getLatestRates(double margin);
+
+    /**
+     * Convert amount from one currency to another using latest available official rates.
+     * If either currency is MRU, its rate is considered 1 by definition.
+     */
+    ConversionResponseDto convert(String from, String to, double amount);
 }
