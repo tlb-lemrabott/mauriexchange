@@ -47,13 +47,34 @@ export class ConverterComponent {
   }
 
   convert() {
+    const amt = Number(this.amount());
+    if (!isFinite(amt) || amt <= 0) {
+      this.error.set('Please enter a valid amount greater than 0');
+      return;
+    }
     this.loading.set(true);
     this.error.set(null);
-    this.convertApi.convert(this.from(), this.to(), this.amount()).subscribe({
-      next: (res: any) => {
-        const value = (res as any)?.data?.value ?? (res as any)?.data?.amount ?? null;
-        this.result.set(value !== null ? `${this.amount()} ${this.from()} = ${value} ${this.to()}` : 'No result');
-        this.loading.set(false);
+    this.convertApi.convert(this.from(), this.to(), amt).subscribe({
+      next: async (res: any) => {
+        try {
+          let payload: any = res;
+          if (res instanceof Blob) {
+            const txt = await res.text();
+            payload = JSON.parse(txt);
+          }
+          const valueRaw = payload?.data?.value ?? payload?.data?.amount ?? null;
+          const value = valueRaw != null ? Number(valueRaw) : null;
+          this.result.set(
+            value !== null
+              ? `${amt} ${this.from()} = ${value.toFixed(2)} ${this.to()}`
+              : 'No result'
+          );
+        } catch (e) {
+          console.error(e);
+          this.error.set('Failed to parse conversion result');
+        } finally {
+          this.loading.set(false);
+        }
       },
       error: (e: any) => {
         this.error.set('Conversion failed');
