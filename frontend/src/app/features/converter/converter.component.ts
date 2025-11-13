@@ -1,4 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
+import { of, from } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ConversionAPIService } from '../../api/api/conversionAPI.service';
@@ -25,27 +27,35 @@ export class ConverterComponent {
 
   constructor() {
     console.debug('[converter] init: fetching currencies');
-    this.currencyApi.getAllCurrencies().subscribe({
-      next: (res: any) => {
-        console.debug('[converter] currencies response', res);
-        const raw = res instanceof Blob
-          ? []
-          : (Array.isArray(res?.data)
-              ? res.data
-              : Array.isArray(res?.data?.items)
-                ? res.data.items
-                : []);
-        const list: Array<{ code: string; name?: string }> = raw.map((c: any) => ({
-          code: c?.code,
-          name: c?.nameFr ?? c?.name ?? c?.code,
-        })).filter((c: any) => !!c.code);
-        this.currencies.set(list);
-      },
-      error: (e) => {
-        console.error(e);
-        this.error.set('Failed to load currencies');
-      }
-    });
+    this.currencyApi
+      .getAllCurrencies()
+      .pipe(
+        switchMap((res: any) => {
+          if (res instanceof Blob) {
+            return from(res.text()).pipe(switchMap(txt => of(JSON.parse(txt))));
+          }
+          return of(res);
+        })
+      )
+      .subscribe({
+        next: (res: any) => {
+          console.debug('[converter] currencies response', res);
+          const raw = Array.isArray(res?.data)
+            ? res.data
+            : Array.isArray(res?.data?.items)
+              ? res.data.items
+              : [];
+          const list: Array<{ code: string; name?: string }> = raw.map((c: any) => ({
+            code: c?.code,
+            name: c?.nameFr ?? c?.name ?? c?.code,
+          })).filter((c: any) => !!c.code);
+          this.currencies.set(list);
+        },
+        error: (e) => {
+          console.error(e);
+          this.error.set('Failed to load currencies');
+        }
+      });
     this.updateUnitRate();
   }
 
