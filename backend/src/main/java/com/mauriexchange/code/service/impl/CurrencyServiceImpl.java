@@ -8,6 +8,7 @@ import com.mauriexchange.code.dto.OfficialRateResponseDto;
 import com.mauriexchange.code.dto.LatestRatesResponseDto;
 import com.mauriexchange.code.dto.ConversionResponseDto;
 import com.mauriexchange.code.dto.HistoricalRatePointDto;
+import com.mauriexchange.code.dto.CompareRatesResponseDto;
 import com.mauriexchange.code.entity.Currency;
 import com.mauriexchange.code.entity.CurrencyData;
 import com.mauriexchange.code.exception.DataNotFoundException;
@@ -508,5 +509,42 @@ public class CurrencyServiceImpl implements CurrencyService {
                             .build();
                 })
                 .collect(java.util.stream.Collectors.toList());
+    }
+
+    private Optional<Double> findExactRateValue(String code, String date) {
+        return getOfficialRateByCodeAndDate(code, date).map(OfficialRateResponseDto::getOfficialRate);
+    }
+
+    @Override
+    public CompareRatesResponseDto compareRates(String code, String fromDate, String toDate) {
+        String upCode = code.toUpperCase();
+
+        Optional<Double> fromOpt = findExactRateValue(upCode, fromDate);
+        Optional<Double> toOpt = findExactRateValue(upCode, toDate);
+
+        if (fromOpt.isEmpty()) {
+            throw new DataNotFoundException("Official rate not found for code: " + upCode + " at date: " + fromDate);
+        }
+        if (toOpt.isEmpty()) {
+            throw new DataNotFoundException("Official rate not found for code: " + upCode + " at date: " + toDate);
+        }
+
+        double from = fromOpt.get();
+        double to = toOpt.get();
+
+        String change = null;
+        if (from != 0.0) {
+            double pct = ((to - from) / from) * 100.0;
+            change = String.format("%+,.2f%%", pct);
+        }
+
+        return CompareRatesResponseDto.builder()
+                .code(upCode)
+                .fromDate(fromDate)
+                .toDate(toDate)
+                .rateFrom(from)
+                .rateTo(to)
+                .changePercent(change)
+                .build();
     }
 }

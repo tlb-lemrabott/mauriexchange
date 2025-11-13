@@ -6,6 +6,7 @@ import com.mauriexchange.code.dto.LatestRatesResponseDto;
 import com.mauriexchange.code.config.RatesConfig;
 import com.mauriexchange.code.dto.ConversionResponseDto;
 import com.mauriexchange.code.dto.HistoricalRatePointDto;
+import com.mauriexchange.code.dto.CompareRatesResponseDto;
 import com.mauriexchange.code.exception.BadRequestException;
 import com.mauriexchange.code.exception.DataNotFoundException;
 import com.mauriexchange.code.service.CurrencyService;
@@ -126,6 +127,36 @@ public class ExchangeRateController {
 
         List<HistoricalRatePointDto> points = currencyService.getHistoryByCodeAndRange(code, start, end);
         return ResponseEntity.ok(ApiResponseDto.success(points));
+    }
+
+    @GetMapping("/compare")
+    @Operation(
+            summary = "Compare two dates' rates",
+            description = "Returns rates for two dates and percentage change for a given currency code"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully compared rates",
+                    content = @Content(schema = @Schema(implementation = ApiResponseDto.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid date format"),
+            @ApiResponse(responseCode = "404", description = "Rate not found for given code/date"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<ApiResponseDto<CompareRatesResponseDto>> compare(
+            @Parameter(description = "Currency code", example = "USD")
+            @RequestParam String code,
+            @Parameter(description = "From date (YYYY-MM-DD)", example = "2025-10-12")
+            @RequestParam(name = "from") String fromDate,
+            @Parameter(description = "To date (YYYY-MM-DD)", example = "2025-10-18")
+            @RequestParam(name = "to") String toDate) {
+        try {
+            LocalDate.parse(fromDate, DateTimeFormatter.ISO_LOCAL_DATE);
+            LocalDate.parse(toDate, DateTimeFormatter.ISO_LOCAL_DATE);
+        } catch (DateTimeParseException ex) {
+            throw new BadRequestException("Invalid date format. Expected YYYY-MM-DD");
+        }
+
+        CompareRatesResponseDto result = currencyService.compareRates(code, fromDate, toDate);
+        return ResponseEntity.ok(ApiResponseDto.success(result));
     }
 
 }
