@@ -3,7 +3,7 @@
   @if (loading()) {
     <div>Loading...</div>
   }
-  @if (error() as err) {
+  @if (error(); as err) {
     <div class="error">{{ err }}</div>
   }
   @if (!loading() && !error() && rates().length === 0) {
