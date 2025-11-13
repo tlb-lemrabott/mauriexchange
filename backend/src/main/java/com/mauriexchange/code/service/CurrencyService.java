@@ -6,6 +6,7 @@ import com.mauriexchange.code.dto.OfficialRateResponseDto;
 import com.mauriexchange.code.dto.LatestRatesResponseDto;
 import com.mauriexchange.code.dto.ConversionResponseDto;
 import com.mauriexchange.code.dto.HistoricalRatePointDto;
+import com.mauriexchange.code.dto.CompareRatesResponseDto;
 
 import java.util.List;
 import java.util.Optional;
@@ -99,4 +100,9 @@ public interface CurrencyService {
      * Get historical official rates for a currency code within [start, end].
      */
     java.util.List<HistoricalRatePointDto> getHistoryByCodeAndRange(String code, String start, String end);
+
+    /**
+     * Compare two dates' official rates for a given currency.
+     */
+    CompareRatesResponseDto compareRates(String code, String fromDate, String toDate);
 }
