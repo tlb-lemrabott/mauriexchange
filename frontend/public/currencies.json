@@ -1,0 +1,11 @@
+[
+  { "code": "MRU", "nameFr": "Ouguiya mauritanienne", "nameAr": "الأوقية الموريتانية", "unity": 1 },
+  { "code": "USD", "nameFr": "Dollar américain", "nameAr": "الدولار الأمريكي", "unity": 1 },
+  { "code": "EUR", "nameFr": "Euro", "nameAr": "اليورو", "unity": 1 },
+  { "code": "XOF", "nameFr": "Franc CFA (UEMOA)", "nameAr": "فرنك غرب أفريقيا", "unity": 1 },
+  { "code": "NOK", "nameFr": "Couronne norvégienne", "nameAr": "الكرونة النرويجية", "unity": 100 },
+  { "code": "DKK", "nameFr": "Couronne danoise", "nameAr": "الكرونة الدنماركية", "unity": 100 },
+  { "code": "GBP", "nameFr": "Livre sterling", "nameAr": "الجنيه الإسترليني", "unity": 1 },
+  { "code": "CNY", "nameFr": "Yuan renminbi", "nameAr": "يوان صيني", "unity": 1 }
+]
+

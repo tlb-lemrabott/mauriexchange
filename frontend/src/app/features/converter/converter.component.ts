@@ -4,7 +4,7 @@ import { switchMap } from 'rxjs/operators';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ConversionAPIService } from '../../api/api/conversionAPI.service';
-import { CurrencyExchangeAPIService } from '../../api/api/currencyExchangeAPI.service';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-converter',
@@ -15,7 +15,7 @@ import { CurrencyExchangeAPIService } from '../../api/api/currencyExchangeAPI.se
 })
 export class ConverterComponent {
   private readonly convertApi = inject(ConversionAPIService);
-  private readonly currencyApi = inject(CurrencyExchangeAPIService);
+  private readonly http = inject(HttpClient);
   protected amount = signal<number>(100);
   protected from = signal<string>('USD');
   protected to = signal<string>('MRU');
@@ -26,37 +26,24 @@ export class ConverterComponent {
   protected unitRate = signal<string | null>(null);
 
   constructor() {
-    console.debug('[converter] init: fetching currencies');
-    this.currencyApi
-      .getAllCurrencies()
-      .pipe(
-        switchMap((res: any) => {
-          if (res instanceof Blob) {
-            return from(res.text()).pipe(switchMap(txt => of(JSON.parse(txt))));
-          }
-          return of(res);
-        })
-      )
-      .subscribe({
-        next: (res: any) => {
-          console.debug('[converter] currencies response', res);
-          const raw = Array.isArray(res?.data)
-            ? res.data
-            : Array.isArray(res?.data?.items)
-              ? res.data.items
-              : [];
-          const list: Array<{ code: string; name?: string }> = raw.map((c: any) => ({
-            code: c?.code,
-            name: c?.nameFr ?? c?.name ?? c?.code,
-          })).filter((c: any) => !!c.code);
-          this.currencies.set(list);
-        },
-        error: (e) => {
-          console.error(e);
-          this.error.set('Failed to load currencies');
+    console.debug('[converter] init: load static currencies.json');
+    this.http.get<any>('currencies.json').subscribe({
+      next: (res) => {
+        const raw = Array.isArray(res) ? res : (Array.isArray(res?.data) ? res.data : []);
+        const list: Array<{ code: string; name?: string }> = raw
+          .map((c: any) => ({ code: c?.code, name: c?.nameFr ?? c?.name ?? c?.code }))
+          .filter((c: any) => !!c.code);
+        this.currencies.set(list);
+        // Ensure MRU is selectable even if missing
+        if (!list.find(c => c.code === 'MRU')) {
+          this.currencies.update(arr => [{ code: 'MRU', name: 'Ouguiya mauritanienne' }, ...arr]);
         }
-      });
-    this.updateUnitRate();
+      },
+      error: (e) => {
+        console.error(e);
+        this.error.set('Failed to load currencies list');
+      }
+    });
   }
 
   convert() {
@@ -81,32 +68,16 @@ export class ConverterComponent {
     const b = this.to();
     this.from.set(b);
     this.to.set(a);
-    if (this.amount() && !this.loading()) {
-      this.convert();
-    }
-    this.updateUnitRate();
+    // do not auto-convert; wait for user to click Convert
   }
 
   onFromChange(value: string) {
     this.from.set(value);
-    this.updateUnitRate();
+    // defer conversion until user clicks Convert
   }
   onToChange(value: string) {
     this.to.set(value);
-    this.updateUnitRate();
+    // defer conversion until user clicks Convert
   }
-
-  private updateUnitRate() {
-    console.debug('[converter] updateUnitRate', this.from(), this.to());
-    this.convertApi.convert(this.from(), this.to(), 1).subscribe({
-      next: (res: any) => {
-        console.debug('[converter] unit rate response', res);
-        const v = (res as any)?.data?.value ?? (res as any)?.data?.amount ?? null;
-        this.unitRate.set(v != null ? `1 ${this.from()} = ${v} ${this.to()}` : null);
-      },
-      error: () => {
-        this.unitRate.set(null);
-      }
-    });
-  }
+  // Removed auto unit-rate calls to avoid premature API requests
 }

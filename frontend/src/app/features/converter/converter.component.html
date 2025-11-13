@@ -62,10 +62,7 @@
           }
         </div>
 
-        <div class="col-12 text-start d-flex align-items-center gap-3">
-          @if (unitRate()) {
-            <span class="text-body-secondary"><i class="bi bi-currency-exchange me-1"></i>{{ unitRate() }}</span>
-          }
+        <div class="col-12 text-start">
           <button type="submit" class="btn btn-primary px-4 py-2" [disabled]="loading()">
             <i class="bi bi-lightning-charge me-1"></i> Convert
           </button>
