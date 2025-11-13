@@ -5,6 +5,7 @@ import com.mauriexchange.code.dto.PaginatedResponseDto;
 import com.mauriexchange.code.dto.OfficialRateResponseDto;
 import com.mauriexchange.code.dto.LatestRatesResponseDto;
 import com.mauriexchange.code.dto.ConversionResponseDto;
+import com.mauriexchange.code.dto.HistoricalRatePointDto;
 
 import java.util.List;
 import java.util.Optional;
@@ -93,4 +94,9 @@ public interface CurrencyService {
      * If either currency is MRU, its rate is considered 1 by definition.
      */
     ConversionResponseDto convert(String from, String to, double amount);
+
+    /**
+     * Get historical official rates for a currency code within [start, end].
+     */
+    java.util.List<HistoricalRatePointDto> getHistoryByCodeAndRange(String code, String start, String end);
 }

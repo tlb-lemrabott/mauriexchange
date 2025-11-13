@@ -5,6 +5,7 @@ import com.mauriexchange.code.dto.OfficialRateResponseDto;
 import com.mauriexchange.code.dto.LatestRatesResponseDto;
 import com.mauriexchange.code.config.RatesConfig;
 import com.mauriexchange.code.dto.ConversionResponseDto;
+import com.mauriexchange.code.dto.HistoricalRatePointDto;
 import com.mauriexchange.code.exception.BadRequestException;
 import com.mauriexchange.code.exception.DataNotFoundException;
 import com.mauriexchange.code.service.CurrencyService;
@@ -28,6 +29,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Optional;
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -88,6 +90,42 @@ public class ExchangeRateController {
         double margin = ratesConfig.getMargin();
         LatestRatesResponseDto payload = currencyService.getLatestRates(margin);
         return ResponseEntity.ok(ApiResponseDto.success(payload));
+    }
+
+    @GetMapping("/history/{code}")
+    @Operation(
+            summary = "Get historical rates by date range",
+            description = "Returns official rates for a currency code within the provided inclusive date range"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved historical rates",
+                    content = @Content(schema = @Schema(implementation = ApiResponseDto.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid date range"),
+            @ApiResponse(responseCode = "404", description = "Currency not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<ApiResponseDto<List<HistoricalRatePointDto>>> getHistory(
+            @Parameter(description = "Currency code", example = "USD")
+            @PathVariable String code,
+            @Parameter(description = "Start date (YYYY-MM-DD)", example = "2025-09-01")
+            @RequestParam String start,
+            @Parameter(description = "End date (YYYY-MM-DD)", example = "2025-10-18")
+            @RequestParam String end) {
+        // Validate dates
+        LocalDate startDate;
+        LocalDate endDate;
+        try {
+            startDate = LocalDate.parse(start, DateTimeFormatter.ISO_LOCAL_DATE);
+            endDate = LocalDate.parse(end, DateTimeFormatter.ISO_LOCAL_DATE);
+        } catch (DateTimeParseException ex) {
+            throw new BadRequestException("Invalid date format. Expected YYYY-MM-DD");
+        }
+        if (endDate.isBefore(startDate)) {
+            throw new BadRequestException("'end' date must be on or after 'start' date");
+        }
+
+        List<HistoricalRatePointDto> points = currencyService.getHistoryByCodeAndRange(code, start, end);
+        return ResponseEntity.ok(ApiResponseDto.success(points));
     }
 
 }
