@@ -47,10 +47,11 @@
         </dependency>
         
         <!-- OpenAPI/Swagger -->
+        <!-- OpenAPI/Swagger (align with Spring Boot 3.5.x / Framework 6.2.x) -->
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-            <version>2.3.0</version>
+            <version>2.7.0</version>
         </dependency>
         
         <!-- JSON Processing -->

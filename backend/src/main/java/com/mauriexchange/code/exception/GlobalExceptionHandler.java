@@ -11,7 +11,7 @@ import org.springframework.web.context.request.WebRequest;
 import java.time.LocalDateTime;
 
 @Slf4j
-@RestControllerAdvice
+@RestControllerAdvice(basePackages = "com.mauriexchange.code.controller")
 public class GlobalExceptionHandler {
     
     @ExceptionHandler(DataNotFoundException.class)

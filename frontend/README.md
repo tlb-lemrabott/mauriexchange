@@ -1,59 +1,64 @@
-# Frontend
+🏠 Main Interface (Home Page)
+1. Header Section
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.3.9.
+Website Name / Logo : "Mauritanian Currency Rates"
 
-## Development server
+Navigation Bar:
+- Home
+- Live Rates
+- Converter
+- Historical Data
+- About / Contact
 
-To start a local development server, run:
+2. Live Exchange Rate Dashboard
+Show the latest exchange rates of the Mauritanian Ouguiya (MRU) against major currencies.
+Currency	Buy Rate	Sell Rate	Last Update	Change (24h)
+USD	39.80	40.10	2 min ago	+0.12%
+EUR	42.90	43.25	2 min ago	-0.05%
+XOF	0.066	0.068	2 min ago	+0.02%
 
-```bash
-ng serve
-```
+🟢 Tip: Use color indicators (green ↑ / red ↓) for daily movement.
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+3. Currency Converter Widget
+A small interactive box:
+[Amount] [Currency Selector A]  ➡  [Currency Selector B]
+[Convert Button]
+Result: 100 USD = 4,010 MRU
 
-## Code scaffolding
+✅ Include auto-update rates
+✅ Add reverse swap button 🔁
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+4. Rate Source Information
+Transparency builds trust — clearly show:
+- Data Source : Central Bank of Mauritania - BCM
+- Last updated timestamp
+- Note: “Exchange rates may vary at physical exchange offices.”
 
-```bash
-ng generate component component-name
-```
+📊 Additional Pages or Features
+5. Historical Chart / Graphs
+- Line chart: MRU vs USD (last 30 days / 6 months / 1 year)
+- Selectable currency pair dropdown
+- Hover to show exact rate per day
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+- 🧩 Example:
+“USD/MRU exchange rate over the past 30 days”
 
-```bash
-ng generate --help
-```
+6. Exchange Office Listings
+Targeting local users:
+- Map or list of major exchange offices / banks
+- Show their rates, address, contact, and working hours
 
-## Building
+Example:
+Banque El Baraka — USD Buy: 39.75 | Sell: 40.15 | 📍 Nouakchott
 
-To build the project run:
+7. News & Insights (Optional)
+A blog-like section:
 
-```bash
-ng build
-```
+“Central Bank announces new exchange policy”
+“How inflation affects MRU exchange rate”
+“Top tips before exchanging money in Mauritania”
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+8. Footer
+Copyright notice
+Terms of use / disclaimer (“Rates for informational purposes only”)
+Social links (LinkedIn, Twitter, WhatsApp share)
