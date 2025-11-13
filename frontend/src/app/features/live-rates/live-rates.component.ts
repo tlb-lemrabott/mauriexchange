@@ -14,11 +14,14 @@ export class LiveRatesComponent {
   protected readonly loading = signal(true);
   protected readonly error = signal<string | null>(null);
   protected readonly rates = signal<any[]>([]);
+  protected readonly lastDate = signal<string | null>(null);
 
   constructor() {
     this.api.getLatestRates().subscribe({
       next: (res: any) => {
         const items = res?.data?.data ?? [];
+        const date = res?.data?.date ?? null;
+        this.lastDate.set(date);
         this.rates.set(items);
         this.loading.set(false);
       },
