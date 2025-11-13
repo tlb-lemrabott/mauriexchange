@@ -36,3 +36,6 @@ build/
 # macOS artifacts
 .DS_Store
 */.DS_Store
+
+# API_ENDPOINTS
+API_ENDPOINTS.md
