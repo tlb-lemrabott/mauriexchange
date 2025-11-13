@@ -1,4 +1,2 @@
-form { display: flex; gap: 1rem; align-items: end; flex-wrap: wrap; }
-label { display: flex; flex-direction: column; gap: .25rem; }
+/* Bootstrap-based layout now; keep minimal tweaks */
 .error { color: #b00020; }
-

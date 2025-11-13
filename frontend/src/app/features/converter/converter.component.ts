@@ -2,6 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ConversionAPIService } from '../../api/api/conversionAPI.service';
+import { CurrencyExchangeAPIService } from '../../api/api/currencyExchangeAPI.service';
 
 @Component({
   selector: 'app-converter',
@@ -11,18 +12,37 @@ import { ConversionAPIService } from '../../api/api/conversionAPI.service';
   styleUrl: './converter.component.css'
 })
 export class ConverterComponent {
-  private readonly api = inject(ConversionAPIService);
-  protected amount = signal(100);
-  protected from = signal('USD');
-  protected to = signal('MRU');
+  private readonly convertApi = inject(ConversionAPIService);
+  private readonly currencyApi = inject(CurrencyExchangeAPIService);
+  protected amount = signal<number>(100);
+  protected from = signal<string>('USD');
+  protected to = signal<string>('MRU');
   protected result = signal<string>('');
   protected loading = signal(false);
   protected error = signal<string | null>(null);
+  protected currencies = signal<Array<{ code: string; name?: string }>>([]);
+
+  constructor() {
+    this.currencyApi.getAllCurrencies().subscribe({
+      next: (res: any) => {
+        const list: Array<{ code: string; name?: string }> = Array.isArray(res?.data)
+          ? res.data
+          : Array.isArray(res?.data?.items)
+            ? res.data.items
+            : [];
+        this.currencies.set(list);
+      },
+      error: (e) => {
+        console.error(e);
+        this.error.set('Failed to load currencies');
+      }
+    });
+  }
 
   convert() {
     this.loading.set(true);
     this.error.set(null);
-    this.api.convert(this.from(), this.to(), this.amount()).subscribe({
+    this.convertApi.convert(this.from(), this.to(), this.amount()).subscribe({
       next: (res: any) => {
         const value = (res as any)?.data?.value ?? (res as any)?.data?.amount ?? null;
         this.result.set(value !== null ? `${this.amount()} ${this.from()} = ${value} ${this.to()}` : 'No result');
@@ -34,5 +54,15 @@ export class ConverterComponent {
         console.error(e);
       }
     });
+  }
+
+  swap() {
+    const a = this.from();
+    const b = this.to();
+    this.from.set(b);
+    this.to.set(a);
+    if (this.amount() && !this.loading()) {
+      this.convert();
+    }
   }
 }

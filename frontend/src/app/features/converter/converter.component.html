@@ -1,20 +1,50 @@
 <section>
-  <h2>Currency Converter</h2>
-  <form (ngSubmit)="convert()">
-    <label>
-      Amount
-      <input type="number" [ngModel]="amount()" (ngModelChange)="amount.set($event)" name="amount" required />
-    </label>
-    <label>
-      From
-      <input type="text" [ngModel]="from()" (ngModelChange)="from.set($event)" name="from" />
-    </label>
-    <label>
-      To
-      <input type="text" [ngModel]="to()" (ngModelChange)="to.set($event)" name="to" />
-    </label>
-    <button type="submit" [disabled]="loading()">Convert</button>
-  </form>
-  <div *ngIf="error() as err" class="error">{{ err }}</div>
-  <p *ngIf="result()">{{ result() }}</p>
+  <div class="card shadow-sm">
+    <div class="card-header bg-white d-flex align-items-center justify-content-between">
+      <h2 class="h5 m-0">Currency Converter</h2>
+    </div>
+    <div class="card-body">
+      <form class="row gy-3 align-items-end" (ngSubmit)="convert()">
+        <div class="col-12 col-md-4">
+          <label class="form-label">Amount</label>
+          <input class="form-control" type="number" [ngModel]="amount()" (ngModelChange)="amount.set($event)" name="amount" min="0" step="0.01" required />
+        </div>
+
+        <div class="col-12 col-md-3">
+          <label class="form-label">From</label>
+          <select class="form-select" [ngModel]="from()" (ngModelChange)="from.set($event)" name="from">
+            @for (c of currencies(); track c.code) {
+              <option [value]="c.code">{{ c.code }} — {{ c.name }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="col-12 col-md-1 text-center">
+          <button class="btn btn-outline-secondary mt-4" type="button" (click)="swap()" [disabled]="loading()" title="Swap">
+            🔁
+          </button>
+        </div>
+
+        <div class="col-12 col-md-3">
+          <label class="form-label">To</label>
+          <select class="form-select" [ngModel]="to()" (ngModelChange)="to.set($event)" name="to">
+            @for (c of currencies(); track c.code) {
+              <option [value]="c.code">{{ c.code }} — {{ c.name }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="col-12 col-md-1 d-grid">
+          <button type="submit" class="btn btn-primary" [disabled]="loading()">Convert</button>
+        </div>
+      </form>
+
+      @if (error(); as err) {
+        <div class="alert alert-danger mt-3" role="alert">{{ err }}</div>
+      }
+      @if (result()) {
+        <div class="alert alert-success mt-3" role="alert">{{ result() }}</div>
+      }
+    </div>
+  </div>
 </section>
