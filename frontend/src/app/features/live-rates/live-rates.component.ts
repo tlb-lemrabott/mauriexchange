@@ -1,6 +1,6 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { CurrencyExchangeAPIService } from '../../api/api/currencyExchangeAPI.service';
+import { ExchangeRatesAPIService } from '../../api/api/exchangeRatesAPI.service';
 
 @Component({
   selector: 'app-live-rates',
@@ -10,16 +10,16 @@ import { CurrencyExchangeAPIService } from '../../api/api/currencyExchangeAPI.se
   styleUrl: './live-rates.component.css'
 })
 export class LiveRatesComponent {
-  private readonly api = inject(CurrencyExchangeAPIService);
+  private readonly api = inject(ExchangeRatesAPIService);
   protected readonly loading = signal(true);
   protected readonly error = signal<string | null>(null);
   protected readonly rates = signal<any[]>([]);
 
   constructor() {
-    // Fetch available currencies (adjust display mapping as needed)
-    this.api.getAllCurrencies().subscribe({
+    this.api.getLatestRates().subscribe({
       next: (res: any) => {
-        this.rates.set((res?.data as any[]) ?? []);
+        const items = res?.data?.data ?? [];
+        this.rates.set(items);
         this.loading.set(false);
       },
       error: (e: any) => {
