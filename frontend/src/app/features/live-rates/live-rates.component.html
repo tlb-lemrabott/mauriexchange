@@ -21,7 +21,7 @@
         </tr>
       </thead>
       <tbody>
-        @for (r of rates(); track r.code) {
+        @for (r of rates(); track r.code; let i = $index) {
           <tr>
             <td>{{ r.code }} — {{ r.name }}</td>
             <td>{{ r.buyRate ?? '-' }}</td>
