@@ -32,7 +32,7 @@
 
         <div class="col-12 col-md-5">
           <label class="form-label">From currency</label>
-          <select class="form-select form-select-lg" [ngModel]="from()" (ngModelChange)="from.set($event)" name="from">
+          <select class="form-select form-select-lg" [ngModel]="from()" (ngModelChange)="onFromChange($event)" name="from">
             @for (c of currencies(); track c.code) {
               <option [value]="c.code">{{ c.code }} — {{ c.name }}</option>
             }
@@ -47,7 +47,7 @@
 
         <div class="col-12 col-md-5">
           <label class="form-label">To currency</label>
-          <select class="form-select form-select-lg" [ngModel]="to()" (ngModelChange)="to.set($event)" name="to">
+          <select class="form-select form-select-lg" [ngModel]="to()" (ngModelChange)="onToChange($event)" name="to">
             @for (c of currencies(); track c.code) {
               <option [value]="c.code">{{ c.code }} — {{ c.name }}</option>
             }

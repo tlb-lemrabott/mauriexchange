@@ -26,11 +26,15 @@ export class ConverterComponent {
   constructor() {
     this.currencyApi.getAllCurrencies().subscribe({
       next: (res: any) => {
-        const list: Array<{ code: string; name?: string }> = Array.isArray(res?.data)
+        const raw = Array.isArray(res?.data)
           ? res.data
           : Array.isArray(res?.data?.items)
             ? res.data.items
             : [];
+        const list: Array<{ code: string; name?: string }> = raw.map((c: any) => ({
+          code: c?.code,
+          name: c?.nameFr ?? c?.name ?? c?.code,
+        })).filter((c: any) => !!c.code);
         this.currencies.set(list);
       },
       error: (e) => {
