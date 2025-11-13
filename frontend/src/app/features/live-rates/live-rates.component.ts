@@ -1,11 +1,11 @@
 import { Component, computed, inject, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { CurrencyExchangeAPIService } from '../../api/api/currencyExchangeAPI.service';
-import { provideApi } from '../../api/provide-api';
 
 @Component({
   selector: 'app-live-rates',
   standalone: true,
-  providers: [provideApi()],
+  imports: [CommonModule],
   templateUrl: './live-rates.component.html',
   styleUrl: './live-rates.component.css'
 })
@@ -16,13 +16,13 @@ export class LiveRatesComponent {
   protected readonly rates = signal<any[]>([]);
 
   constructor() {
-    // Replace with the correct API call once backend endpoint is confirmed
-    this.api.listCurrencies().subscribe({
-      next: (res) => {
-        this.rates.set(res?.data as any[] ?? []);
+    // Fetch available currencies (adjust display mapping as needed)
+    this.api.getAllCurrencies().subscribe({
+      next: (res: any) => {
+        this.rates.set((res?.data as any[]) ?? []);
         this.loading.set(false);
       },
-      error: (e) => {
+      error: (e: any) => {
         this.error.set('Failed to load rates');
         this.loading.set(false);
         console.error(e);
@@ -30,4 +30,3 @@ export class LiveRatesComponent {
     });
   }
 }
-

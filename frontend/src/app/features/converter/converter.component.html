@@ -3,19 +3,18 @@
   <form (ngSubmit)="convert()">
     <label>
       Amount
-      <input type="number" [(ngModel)]="amount()" name="amount" required />
+      <input type="number" [ngModel]="amount()" (ngModelChange)="amount.set($event)" name="amount" required />
     </label>
     <label>
       From
-      <input type="text" [(ngModel)]="from()" name="from" />
+      <input type="text" [ngModel]="from()" (ngModelChange)="from.set($event)" name="from" />
     </label>
     <label>
       To
-      <input type="text" [(ngModel)]="to()" name="to" />
+      <input type="text" [ngModel]="to()" (ngModelChange)="to.set($event)" name="to" />
     </label>
     <button type="submit" [disabled]="loading()">Convert</button>
   </form>
   <div *ngIf="error() as err" class="error">{{ err }}</div>
   <p *ngIf="result()">{{ result() }}</p>
 </section>
-
