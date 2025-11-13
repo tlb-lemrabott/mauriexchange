@@ -5,6 +5,7 @@ import com.mauriexchange.code.config.PaginationConfig;
 import com.mauriexchange.code.dto.CurrencyResponseDto;
 import com.mauriexchange.code.dto.PaginatedResponseDto;
 import com.mauriexchange.code.dto.OfficialRateResponseDto;
+import com.mauriexchange.code.dto.LatestRatesResponseDto;
 import com.mauriexchange.code.entity.Currency;
 import com.mauriexchange.code.entity.CurrencyData;
 import com.mauriexchange.code.exception.DataNotFoundException;
@@ -295,7 +296,7 @@ public class CurrencyServiceImpl implements CurrencyService {
                 .endDate(attrs.getEndDate())
                 .build();
     }
-    
+
     private PaginatedResponseDto<CurrencyResponseDto> createPaginatedResponse(
             List<CurrencyResponseDto> allData, int page, int size) {
         
@@ -324,6 +325,91 @@ public class CurrencyServiceImpl implements CurrencyService {
         return PaginatedResponseDto.<CurrencyResponseDto>builder()
                 .data(pageData)
                 .metadata(metadata)
+                .build();
+    }
+
+    @Override
+    public LatestRatesResponseDto getLatestRates(double margin) {
+        if (currencyData == null || currencyData.getData() == null) {
+            throw new DataNotFoundException("No currency data available");
+        }
+
+        java.util.concurrent.atomic.AtomicReference<String> globalLatestDate = new java.util.concurrent.atomic.AtomicReference<>(null);
+
+        List<LatestRatesResponseDto.Item> items = currencyData.getData().stream()
+                .map(cur -> {
+                    Currency.CurrencyAttributes attrs = cur.getAttributes();
+                    List<CurrencyResponseDto.ExchangeRateDto> rates = null;
+                    if (attrs != null && attrs.getMoneyTodayChanges() != null &&
+                            attrs.getMoneyTodayChanges().getData() != null) {
+                        rates = attrs.getMoneyTodayChanges().getData().stream()
+                                .map(this::convertExchangeRateToDto)
+                                .collect(java.util.stream.Collectors.toList());
+                    }
+
+                    if (rates == null || rates.isEmpty()) {
+                        return LatestRatesResponseDto.Item.builder()
+                                .code(attrs != null ? attrs.getCode() : null)
+                                .name(attrs != null ? attrs.getNameFr() : null)
+                                .officialRate(null)
+                                .buyRate(null)
+                                .sellRate(null)
+                                .change24h(null)
+                                .build();
+                    }
+
+                    // Find latest and previous entries by day
+                    CurrencyResponseDto.ExchangeRateDto latest = rates.stream()
+                            .max(java.util.Comparator.comparing(CurrencyResponseDto.ExchangeRateDto::getDay))
+                            .orElse(null);
+                    String latestDay = latest != null ? latest.getDay() : null;
+
+                    if (latestDay != null) {
+                        globalLatestDate.updateAndGet(prev -> (prev == null || latestDay.compareTo(prev) > 0) ? latestDay : prev);
+                    }
+
+                    Double latestVal = null;
+                    if (latest != null && latest.getValue() != null) {
+                        try { latestVal = Double.parseDouble(latest.getValue()); } catch (NumberFormatException ignored) {}
+                    }
+
+                    // previous: max day less than latestDay
+                    Double prevVal = null;
+                    if (latestDay != null) {
+                        prevVal = rates.stream()
+                                .filter(r -> r.getDay() != null && r.getDay().compareTo(latestDay) < 0)
+                                .max(java.util.Comparator.comparing(CurrencyResponseDto.ExchangeRateDto::getDay))
+                                .map(r -> {
+                                    try { return r.getValue() != null ? Double.parseDouble(r.getValue()) : null; }
+                                    catch (NumberFormatException e) { return null; }
+                                })
+                                .orElse(null);
+                    }
+
+                    Double buy = latestVal != null ? latestVal * (1 - margin) : null;
+                    Double sell = latestVal != null ? latestVal * (1 + margin) : null;
+
+                    String change = null;
+                    if (latestVal != null && prevVal != null && prevVal != 0.0) {
+                        double pct = ((latestVal - prevVal) / prevVal) * 100.0;
+                        change = String.format("%+,.2f%%", pct);
+                    }
+
+                    return LatestRatesResponseDto.Item.builder()
+                            .code(attrs != null ? attrs.getCode() : null)
+                            .name(attrs != null ? attrs.getNameFr() : null)
+                            .officialRate(latestVal)
+                            .buyRate(buy)
+                            .sellRate(sell)
+                            .change24h(change)
+                            .build();
+                })
+                .collect(java.util.stream.Collectors.toList());
+
+        // If no rates had any dates, fallback to null
+        return LatestRatesResponseDto.builder()
+                .date(globalLatestDate.get())
+                .data(items)
                 .build();
     }
 }
