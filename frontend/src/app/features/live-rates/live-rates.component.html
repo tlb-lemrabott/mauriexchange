@@ -14,6 +14,7 @@
       <thead>
         <tr>
           <th>Currency</th>
+          <th>Official</th>
           <th>Buy</th>
           <th>Sell</th>
           <th>Last Update</th>
@@ -24,6 +25,7 @@
         @for (r of rates(); track r.code; let i = $index) {
           <tr>
             <td>{{ r.code }} — {{ r.name }}</td>
+            <td>{{ r.officialRate ?? '-' }}</td>
             <td>{{ r.buyRate ?? '-' }}</td>
             <td>{{ r.sellRate ?? '-' }}</td>
             <td>{{ lastDate() ?? '-' }}</td>
