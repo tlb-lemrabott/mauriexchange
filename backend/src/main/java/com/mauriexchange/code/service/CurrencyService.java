@@ -3,6 +3,7 @@ package com.mauriexchange.code.service;
 import com.mauriexchange.code.dto.CurrencyResponseDto;
 import com.mauriexchange.code.dto.PaginatedResponseDto;
 import com.mauriexchange.code.dto.OfficialRateResponseDto;
+import com.mauriexchange.code.dto.LatestRatesResponseDto;
 
 import java.util.List;
 import java.util.Optional;
@@ -78,4 +79,11 @@ public interface CurrencyService {
      * @return Optional response containing official rate info
      */
     Optional<OfficialRateResponseDto> getOfficialRateByCodeAndDate(String code, String date);
+
+    /**
+     * Get latest rates for all currencies and compute buy/sell and 24h change.
+     * @param margin margin fraction (e.g., 0.01 for ±1%)
+     * @return Aggregated response with latest date and items
+     */
+    LatestRatesResponseDto getLatestRates(double margin);
 }

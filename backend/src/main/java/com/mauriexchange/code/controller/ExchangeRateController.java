@@ -2,6 +2,8 @@ package com.mauriexchange.code.controller;
 
 import com.mauriexchange.code.dto.ApiResponseDto;
 import com.mauriexchange.code.dto.OfficialRateResponseDto;
+import com.mauriexchange.code.dto.LatestRatesResponseDto;
+import com.mauriexchange.code.config.RatesConfig;
 import com.mauriexchange.code.exception.BadRequestException;
 import com.mauriexchange.code.exception.DataNotFoundException;
 import com.mauriexchange.code.service.CurrencyService;
@@ -34,6 +36,7 @@ import java.util.Optional;
 public class ExchangeRateController {
 
     private final CurrencyService currencyService;
+    private final RatesConfig ratesConfig;
 
     @GetMapping("/{code}")
     @Operation(
@@ -69,5 +72,20 @@ public class ExchangeRateController {
         // If in future we fetch live BCM, service can set source to "BCM".
         return ResponseEntity.ok(ApiResponseDto.success(result.get()));
     }
-}
 
+    @GetMapping("/latest")
+    @Operation(
+            summary = "Get latest rates for all currencies",
+            description = "Returns all currencies with their latest official rate and derived buy/sell rates"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved latest rates",
+                    content = @Content(schema = @Schema(implementation = ApiResponseDto.class))),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<ApiResponseDto<LatestRatesResponseDto>> getLatestRates() {
+        double margin = ratesConfig.getMargin();
+        LatestRatesResponseDto payload = currencyService.getLatestRates(margin);
+        return ResponseEntity.ok(ApiResponseDto.success(payload));
+    }
+}
