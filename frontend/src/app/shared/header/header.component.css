@@ -1,12 +1,2 @@
-.header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid #eee;
-}
-.brand a { font-weight: 600; text-decoration: none; color: inherit; }
-.nav { display: flex; gap: 1rem; }
-.nav a { text-decoration: none; color: #333; }
-.nav a.active { color: #0b74de; font-weight: 600; }
-
+/* Enhance active link style */
+.nav-link.active { font-weight: 600; }

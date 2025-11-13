@@ -1,14 +1,19 @@
-<header class="header">
-  <div class="brand">
-    <a routerLink="/">Mauritanian Currency Rates</a>
+<nav class="navbar navbar-expand-lg bg-body-tertiary border-bottom">
+  <div class="container">
+    <a class="navbar-brand fw-semibold" routerLink="/">Mauritanian Currency Rates</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item"><a class="nav-link" routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Home</a></li>
+        <li class="nav-item"><a class="nav-link" routerLink="/live-rates" routerLinkActive="active">Live Rates</a></li>
+        <li class="nav-item"><a class="nav-link" routerLink="/converter" routerLinkActive="active">Converter</a></li>
+        <li class="nav-item"><a class="nav-link" routerLink="/historical" routerLinkActive="active">Historical Data</a></li>
+        <li class="nav-item"><a class="nav-link" routerLink="/offices" routerLinkActive="active">Offices</a></li>
+        <li class="nav-item"><a class="nav-link" routerLink="/about" routerLinkActive="active">About</a></li>
+      </ul>
+    </div>
   </div>
-  <nav class="nav">
-    <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Home</a>
-    <a routerLink="/live-rates" routerLinkActive="active">Live Rates</a>
-    <a routerLink="/converter" routerLinkActive="active">Converter</a>
-    <a routerLink="/historical" routerLinkActive="active">Historical Data</a>
-    <a routerLink="/offices" routerLinkActive="active">Offices</a>
-    <a routerLink="/about" routerLinkActive="active">About</a>
-  </nav>
-</header>
-
+  
+</nav>

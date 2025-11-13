@@ -1,5 +1,10 @@
 <section>
-  <h2>Live Exchange Rates</h2>
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <h2 class="h4 m-0">Live Exchange Rates</h2>
+    @if (lastDate()) {
+      <span class="text-body-secondary small">Last update: {{ lastDate() }}</span>
+    }
+  </div>
   @if (loading()) {
     <div>Loading...</div>
   }
@@ -10,26 +15,32 @@
     <div class="empty">No rates available.</div>
   }
   @if (!loading() && !error() && rates().length > 0) {
-    <table class="rates">
+    <table class="table table-hover align-middle">
       <thead>
         <tr>
-          <th>Currency</th>
-          <th>Official</th>
-          <th>Buy</th>
-          <th>Sell</th>
-          <th>Last Update</th>
-          <th>Change (24h)</th>
+          <th class="text-nowrap">Currency</th>
+          <th class="text-end text-nowrap">Official</th>
+          <th class="text-end text-nowrap">Buy</th>
+          <th class="text-end text-nowrap">Sell</th>
+          <th class="text-nowrap">Last Update</th>
+          <th class="text-end text-nowrap">Change (24h)</th>
         </tr>
       </thead>
       <tbody>
         @for (r of rates(); track r.code; let i = $index) {
           <tr>
-            <td>{{ r.code }} — {{ r.name }}</td>
-            <td>{{ r.officialRate ?? '-' }}</td>
-            <td>{{ r.buyRate ?? '-' }}</td>
-            <td>{{ r.sellRate ?? '-' }}</td>
-            <td>{{ lastDate() ?? '-' }}</td>
-            <td>{{ r.change24h ?? '-' }}</td>
+            <td class="text-nowrap"><span class="fw-semibold">{{ r.code }}</span> — <span class="text-body-secondary">{{ r.name }}</span></td>
+            <td class="text-end">{{ r.officialRate ?? '-' }}</td>
+            <td class="text-end">{{ r.buyRate ?? '-' }}</td>
+            <td class="text-end">{{ r.sellRate ?? '-' }}</td>
+            <td class="text-nowrap">{{ lastDate() ?? '-' }}</td>
+            <td class="text-end">
+              @if (r.change24h) {
+                <span class="badge" [class.text-bg-success]="(r.change24h + '').startsWith('+')" [class.text-bg-danger]="(r.change24h + '').startsWith('-')">{{ r.change24h }}</span>
+              } @else {
+                <span class="text-body-secondary">-</span>
+              }
+            </td>
           </tr>
         }
       </tbody>
