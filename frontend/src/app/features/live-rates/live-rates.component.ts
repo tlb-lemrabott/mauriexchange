@@ -19,7 +19,9 @@ export class LiveRatesComponent {
   constructor() {
     this.api.getLatestRates().subscribe({
       next: (res: any) => {
-        const items = res?.data?.data ?? [];
+        // Debug log to verify payload shape during development
+        console.debug('[live-rates] latest response', res);
+        const items = Array.isArray(res?.data?.data) ? res.data.data : [];
         const date = res?.data?.date ?? null;
         this.lastDate.set(date);
         this.rates.set(items);
