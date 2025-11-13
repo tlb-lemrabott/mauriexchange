@@ -12,10 +12,19 @@
       <form class="row gy-4" (ngSubmit)="convert()">
         <div class="col-12">
           <label class="form-label">Amount</label>
-          <div class="input-group">
-            <input class="form-control form-control-lg" type="number" [ngModel]="amount()" (ngModelChange)="amount.set($event)" name="amount" min="0" step="0.01" placeholder="Enter amount" required />
-            <span class="input-group-text text-body-secondary d-none d-sm-inline">{{ from() }}</span>
-          </div>
+          <input
+            class="form-control form-control-lg"
+            type="number"
+            inputmode="decimal"
+            [ngModel]="amount()"
+            (ngModelChange)="amount.set($event)"
+            name="amount"
+            min="0"
+            step="0.01"
+            placeholder="Enter amount (number only)"
+            aria-describedby="amountHelp"
+            required />
+          <div id="amountHelp" class="form-text">Enter a numeric value, e.g., 100.00</div>
         </div>
 
         <div class="col-12 col-md-5">
