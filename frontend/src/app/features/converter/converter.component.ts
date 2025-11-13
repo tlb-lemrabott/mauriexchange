@@ -24,13 +24,17 @@ export class ConverterComponent {
   protected unitRate = signal<string | null>(null);
 
   constructor() {
+    console.debug('[converter] init: fetching currencies');
     this.currencyApi.getAllCurrencies().subscribe({
       next: (res: any) => {
-        const raw = Array.isArray(res?.data)
-          ? res.data
-          : Array.isArray(res?.data?.items)
-            ? res.data.items
-            : [];
+        console.debug('[converter] currencies response', res);
+        const raw = res instanceof Blob
+          ? []
+          : (Array.isArray(res?.data)
+              ? res.data
+              : Array.isArray(res?.data?.items)
+                ? res.data.items
+                : []);
         const list: Array<{ code: string; name?: string }> = raw.map((c: any) => ({
           code: c?.code,
           name: c?.nameFr ?? c?.name ?? c?.code,
@@ -83,8 +87,10 @@ export class ConverterComponent {
   }
 
   private updateUnitRate() {
+    console.debug('[converter] updateUnitRate', this.from(), this.to());
     this.convertApi.convert(this.from(), this.to(), 1).subscribe({
       next: (res: any) => {
+        console.debug('[converter] unit rate response', res);
         const v = (res as any)?.data?.value ?? (res as any)?.data?.amount ?? null;
         this.unitRate.set(v != null ? `1 ${this.from()} = ${v} ${this.to()}` : null);
       },

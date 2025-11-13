@@ -32,11 +32,15 @@
 
         <div class="col-12 col-md-5">
           <label class="form-label">From currency</label>
-          <select class="form-select form-select-lg" [ngModel]="from()" (ngModelChange)="onFromChange($event)" name="from">
-            @for (c of currencies(); track c.code) {
-              <option [value]="c.code">{{ c.code }} — {{ c.name }}</option>
-            }
-          </select>
+          @if (currencies().length === 0) {
+            <div class="form-text">Loading currencies…</div>
+          } @else {
+            <select class="form-select form-select-lg" [ngModel]="from()" (ngModelChange)="onFromChange($event)" name="from">
+              @for (c of currencies(); track c.code) {
+                <option [value]="c.code">{{ c.code }} — {{ c.name }}</option>
+              }
+            </select>
+          }
         </div>
 
         <div class="col-12 col-md-2 d-flex justify-content-center align-items-end">
@@ -47,11 +51,15 @@
 
         <div class="col-12 col-md-5">
           <label class="form-label">To currency</label>
-          <select class="form-select form-select-lg" [ngModel]="to()" (ngModelChange)="onToChange($event)" name="to">
-            @for (c of currencies(); track c.code) {
-              <option [value]="c.code">{{ c.code }} — {{ c.name }}</option>
-            }
-          </select>
+          @if (currencies().length === 0) {
+            <div class="form-text">Loading currencies…</div>
+          } @else {
+            <select class="form-select form-select-lg" [ngModel]="to()" (ngModelChange)="onToChange($event)" name="to">
+              @for (c of currencies(); track c.code) {
+                <option [value]="c.code">{{ c.code }} — {{ c.name }}</option>
+              }
+            </select>
+          }
         </div>
 
         <div class="col-12 text-start d-flex align-items-center gap-3">
