@@ -30,9 +30,9 @@
         @for (r of rates(); track r.code; let i = $index) {
           <tr>
             <td class="text-nowrap"><span class="fw-semibold">{{ r.code }}</span> — <span class="text-body-secondary">{{ r.name }}</span></td>
-            <td class="text-end">{{ r.officialRate ?? '-' }}</td>
-            <td class="text-end">{{ r.buyRate ?? '-' }}</td>
-            <td class="text-end">{{ r.sellRate ?? '-' }}</td>
+            <td class="text-end">{{ r.officialRate | number:'1.2-2' }}</td>
+            <td class="text-end">{{ r.buyRate | number:'1.2-2' }}</td>
+            <td class="text-end">{{ r.sellRate | number:'1.2-2' }}</td>
             <td class="text-nowrap">{{ lastDate() ?? '-' }}</td>
             <td class="text-end">
               @if (r.change24h) {
