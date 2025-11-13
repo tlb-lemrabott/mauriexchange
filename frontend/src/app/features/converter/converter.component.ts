@@ -64,11 +64,9 @@ export class ConverterComponent {
           }
           const valueRaw = payload?.data?.convertedAmount ?? payload?.data?.value ?? null;
           const value = valueRaw != null ? Number(valueRaw) : null;
-          const rate = payload?.data?.rate != null ? Number(payload.data.rate) : null;
-          const date = payload?.data?.date ?? null;
           this.result.set(
             value !== null
-              ? `${amt} ${this.from()} = ${value.toFixed(2)} ${this.to()}${rate != null ? ` (rate: ${rate.toFixed(4)})` : ''}${date ? ` • ${date}` : ''}`
+              ? `${amt} ${this.from()} = ${value.toFixed(2)} ${this.to()}`
               : 'No result'
           );
         } catch (e) {
