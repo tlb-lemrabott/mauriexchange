@@ -7,6 +7,7 @@ import com.mauriexchange.code.dto.PaginatedResponseDto;
 import com.mauriexchange.code.dto.OfficialRateResponseDto;
 import com.mauriexchange.code.dto.LatestRatesResponseDto;
 import com.mauriexchange.code.dto.ConversionResponseDto;
+import com.mauriexchange.code.dto.HistoricalRatePointDto;
 import com.mauriexchange.code.entity.Currency;
 import com.mauriexchange.code.entity.CurrencyData;
 import com.mauriexchange.code.exception.DataNotFoundException;
@@ -479,5 +480,33 @@ public class CurrencyServiceImpl implements CurrencyService {
                 .convertedAmount(converted)
                 .date(date)
                 .build();
+    }
+
+    @Override
+    public java.util.List<HistoricalRatePointDto> getHistoryByCodeAndRange(String code, String start, String end) {
+        Optional<CurrencyResponseDto> currencyOpt = getCurrencyByCode(code);
+        if (currencyOpt.isEmpty()) {
+            throw new DataNotFoundException("Currency not found with code: " + code);
+        }
+
+        List<CurrencyResponseDto.ExchangeRateDto> rates = currencyOpt.get().getExchangeRates();
+        if (rates == null || rates.isEmpty()) {
+            return java.util.List.of();
+        }
+
+        return rates.stream()
+                .filter(r -> r.getDay() != null && r.getDay().compareTo(start) >= 0 && r.getDay().compareTo(end) <= 0)
+                .sorted(java.util.Comparator.comparing(CurrencyResponseDto.ExchangeRateDto::getDay))
+                .map(r -> {
+                    Double val = null;
+                    try {
+                        val = r.getValue() != null ? Double.parseDouble(r.getValue()) : null;
+                    } catch (NumberFormatException ignored) {}
+                    return HistoricalRatePointDto.builder()
+                            .date(r.getDay())
+                            .officialRate(val)
+                            .build();
+                })
+                .collect(java.util.stream.Collectors.toList());
     }
 }
