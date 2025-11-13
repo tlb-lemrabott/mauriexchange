@@ -2,7 +2,9 @@
   <h2>Live Exchange Rates</h2>
   <div *ngIf="loading()">Loading...</div>
   <div *ngIf="error() as err" class="error">{{ err }}</div>
-  <table *ngIf="!loading() && !error()" class="rates">
+  <div *ngIf="!loading() && !error() && rates().length === 0" class="empty">No rates available.</div>
+
+  <table *ngIf="!loading() && !error() && rates().length > 0" class="rates">
     <thead>
       <tr>
         <th>Currency</th>
@@ -14,13 +16,12 @@
     </thead>
     <tbody>
       <tr *ngFor="let r of rates()">
-        <td>{{ r.code || r.currencyCode }}</td>
-        <td>{{ r.buyRate || '-' }}</td>
-        <td>{{ r.sellRate || '-' }}</td>
-        <td>{{ r.lastUpdated || '-' }}</td>
-        <td>{{ r.change24h || '-' }}</td>
+        <td>{{ r.code }} — {{ r.name }}</td>
+        <td>{{ r.buyRate ?? '-' }}</td>
+        <td>{{ r.sellRate ?? '-' }}</td>
+        <td>{{ lastDate() ?? '-' }}</td>
+        <td>{{ r.change24h ?? '-' }}</td>
       </tr>
     </tbody>
   </table>
 </section>
-
