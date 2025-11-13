@@ -21,6 +21,7 @@ export class ConverterComponent {
   protected loading = signal(false);
   protected error = signal<string | null>(null);
   protected currencies = signal<Array<{ code: string; name?: string }>>([]);
+  protected unitRate = signal<string | null>(null);
 
   constructor() {
     this.currencyApi.getAllCurrencies().subscribe({
@@ -37,6 +38,7 @@ export class ConverterComponent {
         this.error.set('Failed to load currencies');
       }
     });
+    this.updateUnitRate();
   }
 
   convert() {
@@ -64,5 +66,27 @@ export class ConverterComponent {
     if (this.amount() && !this.loading()) {
       this.convert();
     }
+    this.updateUnitRate();
+  }
+
+  onFromChange(value: string) {
+    this.from.set(value);
+    this.updateUnitRate();
+  }
+  onToChange(value: string) {
+    this.to.set(value);
+    this.updateUnitRate();
+  }
+
+  private updateUnitRate() {
+    this.convertApi.convert(this.from(), this.to(), 1).subscribe({
+      next: (res: any) => {
+        const v = (res as any)?.data?.value ?? (res as any)?.data?.amount ?? null;
+        this.unitRate.set(v != null ? `1 ${this.from()} = ${v} ${this.to()}` : null);
+      },
+      error: () => {
+        this.unitRate.set(null);
+      }
+    });
   }
 }

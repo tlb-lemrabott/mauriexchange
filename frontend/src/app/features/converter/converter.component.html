@@ -12,18 +12,21 @@
       <form class="row gy-4" (ngSubmit)="convert()">
         <div class="col-12">
           <label class="form-label">Amount</label>
-          <input
-            class="form-control form-control-lg"
-            type="number"
-            inputmode="decimal"
-            [ngModel]="amount()"
-            (ngModelChange)="amount.set($event)"
-            name="amount"
-            min="0"
-            step="0.01"
-            placeholder="Enter amount"
-            aria-describedby="amountHelp"
-            required />
+          <div class="input-group input-group-lg">
+            <span class="input-group-text"><i class="bi bi-123"></i></span>
+            <input
+              class="form-control"
+              type="number"
+              inputmode="decimal"
+              [ngModel]="amount()"
+              (ngModelChange)="amount.set($event)"
+              name="amount"
+              min="0"
+              step="0.01"
+              placeholder="Enter amount (number only)"
+              aria-describedby="amountHelp"
+              required />
+          </div>
           <div id="amountHelp" class="form-text">Enter a numeric value, e.g., 100.00</div>
         </div>
 
@@ -38,7 +41,7 @@
 
         <div class="col-12 col-md-2 d-flex justify-content-center align-items-end">
           <button class="swap-btn" type="button" (click)="swap()" [disabled]="loading()" title="Swap currencies">
-            ⇄
+            <i class="bi bi-arrow-left-right"></i>
           </button>
         </div>
 
@@ -51,8 +54,13 @@
           </select>
         </div>
 
-        <div class="col-12 text-start">
-          <button type="submit" class="btn btn-primary px-4 py-2" [disabled]="loading()">Convert</button>
+        <div class="col-12 text-start d-flex align-items-center gap-3">
+          @if (unitRate()) {
+            <span class="text-body-secondary"><i class="bi bi-currency-exchange me-1"></i>{{ unitRate() }}</span>
+          }
+          <button type="submit" class="btn btn-primary px-4 py-2" [disabled]="loading()">
+            <i class="bi bi-lightning-charge me-1"></i> Convert
+          </button>
         </div>
       </form>
 
