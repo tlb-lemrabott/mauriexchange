@@ -20,7 +20,7 @@ export class LiveRatesComponent {
 
   constructor() {
     this.api
-      .getLatestRates()
+      .getLatestRates('body', false, { httpHeaderAccept: 'application/json' })
       .pipe(
         map((res: any) => {
           console.debug('[live-rates] latest response', res);
