@@ -1,5 +1,35 @@
 <section>
-  <h2>Historical Data</h2>
-  <p>Charts and selectors will appear here.</p>
-</section>
+  <div class="card shadow-sm">
+    <div class="card-header bg-white d-flex flex-wrap gap-2 align-items-center justify-content-between">
+      <h2 class="h5 m-0">Historical Chart</h2>
+      <div class="d-flex gap-2">
+        <button class="btn btn-outline-secondary btn-sm" [class.active]="range()==='30d'" (click)="setRange('30d')">Last 30 days</button>
+        <button class="btn btn-outline-secondary btn-sm" [class.active]="range()==='6m'" (click)="setRange('6m')">6 months</button>
+        <button class="btn btn-outline-secondary btn-sm" [class.active]="range()==='1y'" (click)="setRange('1y')">1 year</button>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="row g-3 align-items-end mb-3">
+        <div class="col-12 col-md-4">
+          <label class="form-label">Currency</label>
+          <select class="form-select" [ngModel]="currency()" (ngModelChange)="onCurrencyChange($event)">
+            @for (c of currencies(); track c.code) {
+              <option [value]="c.code">{{ c.code }} — {{ c.name }}</option>
+            }
+          </select>
+        </div>
+      </div>
 
+      @if (loading()) {
+        <div class="text-body-secondary text-center py-4">Loading history…</div>
+      }
+      @if (error(); as err) {
+        <div class="alert alert-danger" role="alert">{{ err }}</div>
+      }
+
+      <div class="chart-wrap">
+        <canvas #chartCanvas></canvas>
+      </div>
+    </div>
+  </div>
+</section>
